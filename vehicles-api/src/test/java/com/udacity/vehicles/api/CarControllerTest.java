@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -110,6 +111,35 @@ public class CarControllerTest {
                 get(new URI("/cars/1"))).andExpect(status().is(HttpStatus.OK.value()))
                 .andExpect(content().string(containsString("\"condition\":\"USED\"")))
                 .andExpect(content().string(containsString("\"code\":101,\"name\":\"Chevrolet\"")));
+    }
+
+    /**
+     * Tests the update of a single car by ID.
+     *
+     * @throws Exception if the delete operation of a vehicle fails
+     */
+    @Test
+    public void updateCar() throws Exception {
+        Car baseCar = getCar();
+        baseCar.setCondition(Condition.NEW);
+
+        Car car = new Car();
+        car.setCondition(Condition.NEW);
+        car.setDetails(baseCar.getDetails());
+
+        mvc.perform(put(new URI("/cars/1"))
+                .content(json.write(car).getJson())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is(HttpStatus.OK.value()));
+
+
+        given(carService.findById(any())).willReturn(baseCar);
+
+        mvc.perform(
+                get(new URI("/cars/1"))).andExpect(status().is(HttpStatus.OK.value()))
+                .andExpect(content().string(containsString("\"condition\":\"NEW\"")))
+                .andReturn();
     }
 
     /**

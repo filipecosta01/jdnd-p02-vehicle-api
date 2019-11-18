@@ -52,7 +52,10 @@ public class CarService {
         if (!optionalCar.isPresent()) {
             throw new CarNotFoundException("Car with id " + id + " was not found");
         }
-        return optionalCar.get();
+        final Car car = optionalCar.get();
+        car.setPrice(pricing.getPrice(car.getId()));
+        car.setLocation(maps.getAddress(car.getLocation()));
+        return car;
     }
 
     /**
@@ -66,8 +69,6 @@ public class CarService {
                     .map(carToBeUpdated -> {
                         carToBeUpdated.setDetails(car.getDetails());
                         carToBeUpdated.setLocation(maps.getAddress(car.getLocation()));
-                        carToBeUpdated.setPrice(pricing.getPrice(car.getId()));
-                        carToBeUpdated.setCondition(car.getCondition());
                         return repository.save(carToBeUpdated);
                     }).orElseThrow(CarNotFoundException::new);
         }
